@@ -9,8 +9,7 @@ export const loginUser = async (req, res, next) => {
         if(result.statusCode !== undefined) return next(result)
         res.status(200).json({status : "Success", data : result})
     } catch (error) {
-        console.log(error)
-        return next(createError(404, "Something Error"))
+        return next(error)
     }
 }
 

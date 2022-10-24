@@ -12,4 +12,4 @@ try {
     console.log(error)
 }
 
-export default Sequelize
+export default sequelize

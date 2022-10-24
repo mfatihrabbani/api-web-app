@@ -1,18 +1,27 @@
-import { loginUserService } from "../service/usersServicejs"
-import { createError } from "../utils/errorHandle"
+import { loginUserService, registerUserService } from "../service/usersService.js"
 
 export const loginUser = async (req, res, next) => {
     const {email, password} = req.body
     const user = {email, password}
+    console.log(user)
     try {
         const result = await loginUserService(user)
-        if(result.statusCode !== undefined) return next(result)
+        if(result.status !== undefined) return next(result)
         res.status(200).json({status : "Success", data : result})
     } catch (error) {
         return next(error)
     }
 }
 
-export const registerUser = (req, res, next) => {
-
+export const registerUser = async (req, res, next) => {
+    const {email, password, confirmPassword} = req.body
+    const user = {email, password, confirmPassword}
+    try {
+        const result = await registerUserService(user)
+        if(result.status !== undefined) return next(result)
+        res.cookie("Authorization", result.token)
+        res.status(200).json({status : "Success", data : result})
+    } catch (error) {
+        return next(error)
+    }
 }

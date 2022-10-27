@@ -1,0 +1,16 @@
+Table users {
+  id int
+  id_user varchar [PK]
+  email varchar
+  password varchar
+}
+
+Table profiles {
+  id int [increment]
+  id_profile varchar [PK]
+  name varchar(200) [null]
+  grade int
+  major varchar
+}
+
+Ref : users.id_user - profiles.id_profile

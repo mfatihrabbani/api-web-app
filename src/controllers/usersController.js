@@ -26,3 +26,16 @@ export const registerUser = async (req, res, next) => {
         return next(error)
     }
 }
+
+export const forgotPassword = async (req, res) => {
+    const {newPassword, confirmPassword} = res.body
+    const password = {
+        newPassword,
+        confirmPassword
+    }
+    try{
+        const response = 
+    }catch(error){
+
+    }
+}

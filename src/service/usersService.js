@@ -1,8 +1,9 @@
 import Users from "../model/usersModel.js";
+import ForgotPassword from "../model/forgotPassword.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 import uniqid from "uniqid"
-import { createError } from "../utils/errorHandle.js";
+import { createError, validationError, parsingToJSObject } from "../utils/errorHandle.js";
 
 export const registerUserService = async (user) => {
   const { email, password, confirmPassword } = user;
@@ -49,3 +50,39 @@ export const loginUserService = async (user) => {
     return createError(404, "Something Error");
   }
 };
+
+export const createForgotPasswordService = async (idUser) => {
+  let error = []
+  if(!idUser) error.push("Please check again your id user")
+  validationError(400, error)
+  let user = await Users.findOne({where: {id_user: idUser}})
+  user =  parsingToJSObject(user)
+  if(user == null) createError(404, "User not found")
+  const token = jwt.sign({
+    idUser,
+  }, 'TOKEN_FORGOT_PASSWORD',
+  {expiresIn: 60 * 60});
+  const storeToken = await ForgotPassword.create({
+    token
+  })
+  return token
+}
+
+export const forgotPasswordService = async (password) => {
+  const {newPassword, confirmPassword, token} = password
+  console.log(token)
+  let error = []
+  if(!newPassword) error.push("Password cannot blank")
+  if(!confirmPassword) error.push("Confirm password cannot blank")
+  if(newPassword.length < 8) error.push("Password must be at least 8 characters long")
+  if(newPassword != confirmPassword) error.push("Password doesnt match")
+  validationError(404, error)
+  let checkAlreadyToken = await ForgotPassword.findOne({where: {token}})
+  checkAlreadyToken = parsingToJSObject(checkAlreadyToken)
+  if(checkAlreadyToken == null) throw createError(404, "Token not found")
+  if(checkAlreadyToken.used) throw createError(404, "Token already used")
+  const idUser = await jwt.verify(token, 'TOKEN_FORGOT_PASSWORD')
+  const hashNewPassword = await bcrypt.hash(newPassword, 10)
+  const updatePassword = Users.update({password: hashNewPassword}, {where: {id_user: idUser.idUser}})
+  const setUsedToken = await ForgotPassword.update({used: true}, {where: {token}})
+}

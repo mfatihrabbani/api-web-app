@@ -1,5 +1,6 @@
 import Users from "../model/usersModel.js";
 import ForgotPassword from "../model/forgotPassword.js"
+import {registerSchema, loginSchema} from "../schema/usersSchema.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 import uniqid from "uniqid"
@@ -7,12 +8,11 @@ import { createError, validationError, parsingToJSObject } from "../utils/errorH
 
 export const registerUserService = async (user) => {
   const { email, password, confirmPassword } = user;
-  if (!email || !password || !confirmPassword)
-    return createError(401, "Email or password cannot empty");
-  if (password.length < 8)
-    return createError(401, "Password length must 8 or more");
-  if (password != confirmPassword)
-    return createError(401, "Password doenst match");
+  const result = await registerSchema.validate(user, {abortEarly: false})
+  console.log(result)
+  if(result.error != null){
+    validationError(400, result.error.message)
+  }
   try {
     const checkAlreadyUsedEmail = await Users.findOne({
       where: { email: email },
@@ -36,7 +36,10 @@ export const registerUserService = async (user) => {
 export const loginUserService = async (user) => {
   const { email, password } = user;
   console.log(email + " "+ password)
-  if(!email || !password) return createError(401, "Email or password cannot empty")
+  const result = await loginSchema.validate(user, {abortEarly: false})
+    if(result.error != null){
+    validationError(400, result.error.message)
+  }
   try {
     const userData = await Users.findOne({where: {email}})
     const result = JSON.parse(JSON.stringify(userData))

@@ -17,6 +17,8 @@ const Users = sequelize.define("users",{
     }
 })
 
+
+
 Users.sync({alter: false})
 
 export default Users

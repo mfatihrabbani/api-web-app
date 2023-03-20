@@ -2,8 +2,9 @@ import express from "express"
 import bodyParser from "body-parser"
 import usersApi from "./routes/usersRoute.js"
 import cors from "cors"
+import config from "./environment.js"
+console.log(config)
 const app = express()
-
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(express.json())
@@ -20,6 +21,6 @@ app.use("/", (err, req, res, next) => {
     }
 })
 
-app.listen(3001, () => {
+app.listen(config.server.port, () => {
     console.log("server start..")
 })
